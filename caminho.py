@@ -71,6 +71,10 @@ class Mapa:
 
 
 if __name__ == '__main__':
-    mapa = Mapa(7, 5)
+    import sys
+    if len(sys.argv) == 3:
+        mapa = Mapa(*(int(n) for n in sys.argv[1:]))
+    else:
+        mapa = Mapa(7, 5)
     mapa.construir()
     print(mapa)
