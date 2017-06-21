@@ -1,4 +1,5 @@
 import random
+from base64 import b32encode
 
 AGUA = '-'
 PEDRA = '#'
@@ -7,6 +8,7 @@ SETA = 'A'
 
 class Mapa:
     def __init__(self, largura, altura):
+        assert largura <= 8  # para facilitar geracao de chaves com base 32
         self.largura = largura
         self.altura = altura
         self.casas = [[AGUA] * largura for i in range(altura)]
@@ -53,6 +55,16 @@ class Mapa:
                 mapa[y, x] = caractere
         return mapa
 
+    def chave(self):
+        octetos = bytearray(self.altura)
+        for j, linha in enumerate(self.casas):
+            bits = []
+            for casa in linha:
+                bits.append('0' if casa == AGUA else '1')
+            octetos[j] = int(''.join(bits), 2)
+        codigo = b32encode(octetos).decode('ASCII')
+        return codigo[:4] + '-' + codigo[4:]
+
     def ortogonais(self, y, x):
         coords = [(y-1, x), (y, x-1), (y, x+1), (y+1, x)]
         for vy, vx in coords:
@@ -73,8 +85,10 @@ class Mapa:
 if __name__ == '__main__':
     import sys
     if len(sys.argv) == 3:
-        mapa = Mapa(*(int(n) for n in sys.argv[1:]))
+        largura, altura = (int(n) for n in sys.argv[1:])
+        mapa = Mapa(largura, altura)
     else:
         mapa = Mapa(7, 5)
     mapa.construir()
     print(mapa)
+    print(mapa.chave())
